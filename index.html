@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pac-Man em HTML</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #000;
+        }
+        canvas {
+            border: 1px solid #fff;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .control-btn {
+            background-color: #333;
+            border: none;
+            color: #fff;
+            padding: 10px;
+            margin: 5px;
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="controls">
+        <button class="control-btn" id="up">↑</button>
+        <button class="control-btn" id="left">←</button>
+        <button class="control-btn" id="down">↓</button>
+        <button class="control-btn" id="right">→</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const pacMan = {
+            x: 50,
+            y: 50,
+            size: 30,
+            speed: 3,
+            dx: 0,
+            dy: 0
+        };
+
+        const food = {
+            x: 200,
+            y: 200,
+            size: 10
+        };
+
+        function drawPacMan() {
+            ctx.beginPath();
+            ctx.arc(pacMan.x, pacMan.y, pacMan.size, 0.2 * Math.PI, 1.8 * Math.PI);
+            ctx.lineTo(pacMan.x, pacMan.y);
+            ctx.fillStyle = 'yellow';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawFood() {
+            ctx.beginPath();
+            ctx.arc(food.x, food.y, food.size, 0, 2 * Math.PI);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function update() {
+            pacMan.x += pacMan.dx;
+            pacMan.y += pacMan.dy;
+
+            if (pacMan.x < pacMan.size) pacMan.x = pacMan.size;
+            if (pacMan.x > canvas.width - pacMan.size) pacMan.x = canvas.width - pacMan.size;
+            if (pacMan.y < pacMan.size) pacMan.y = pacMan.size;
+            if (pacMan.y > canvas.height - pacMan.size) pacMan.y = canvas.height - pacMan.size;
+
+            const dx = pacMan.x - food.x;
+            const dy = pacMan.y - food.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < pacMan.size) {
+                food.x = Math.random() * (canvas.width - food.size * 2) + food.size;
+                food.y = Math.random() * (canvas.height - food.size * 2) + food.size;
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPacMan();
+            drawFood();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function movePacMan(direction) {
+            switch (direction) {
+                case 'up':
+                    pacMan.dx = 0;
+                    pacMan.dy = -pacMan.speed;
+                    break;
+                case 'down':
+                    pacMan.dx = 0;
+                    pacMan.dy = pacMan.speed;
+                    break;
+                case 'left':
+                    pacMan.dx = -pacMan.speed;
+                    pacMan.dy = 0;
+                    break;
+                case 'right':
+                    pacMan.dx = pacMan.speed;
+                    pacMan.dy = 0;
+                    break;
+            }
+        }
+
+        document.getElementById('up').addEventListener('touchstart', () => movePacMan('up'));
+        document.getElementById('down').addEventListener('touchstart', () => movePacMan('down'));
+        document.getElementById('left').addEventListener('touchstart', () => movePacMan('left'));
+        document.getElementById('right').addEventListener('touchstart', () => movePacMan('right'));
+
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('touchend', () => {
+                pacMan.dx = 0;
+                pacMan.dy = 0;
+            });
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
